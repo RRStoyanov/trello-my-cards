@@ -1,0 +1,179 @@
+<html>
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script type="text/javascript" src="jquery.timeago.js"></script>
+<script type="text/javascript" src="underscore.js"></script>
+<script type="text/javascript" src="https://api.trello.com/1/client.js?key=d7704cd36b82b0ec891e9196b95576f8"></script>
+
+<style type="text/css">
+
+	body {
+		width:335px;
+		background-color:#164b69;
+		font-family:Helvetica, sans-serif;
+	}
+	
+	#output {
+		width:455px;
+		background:#FFF;
+		border:1px solid #FFF;
+		padding:10px;
+		border-radius:10px;
+	}
+	
+	.card {
+		width:285px;
+		border-radius:5px;
+		background-color:#FFF;
+		padding:5px;
+		padding-bottom: 15px;
+		margin-bottom:5px;
+		border:1px solid #BBB;
+		list-style-type:none;
+	}
+	
+	a {
+		text-decoration:none;
+		color:#000;
+	}
+
+	.loading {
+		color: #fff;
+		text-align: center;
+	}
+	
+	.board {
+		width:300px;
+		background:#e3e3e3;
+		border-radius:5px;
+		padding:10px;
+		margin-bottom:5px;
+	}
+	
+	.subscript {
+		float:right;
+		font-size:10px;
+		color:#BBB;
+	}
+	
+	#auth {
+		text-align:center;
+		font-weight:bold;
+	}
+	
+	#auth a {
+		color:#EEE;
+		text-decoration:none;
+	}
+	
+	#auth a:hover {
+		border-bottom:1px solid #EEE;
+	}
+	
+		
+</style>
+
+<body>
+	<div id="auth">
+		<script type="text/javascript">
+	  		document.write("<a href="+chrome.extension.getURL('options.html')+" target='_blank'>Connect to Trello</a>");
+		</script>
+  	</div>
+
+	<div id="boards">
+		<div class="loading">Loading boards...</div>
+	</div>
+</body>
+
+<script type="text/javascript">
+	
+	if(localStorage['auth'] == '1')
+	{
+		$("#auth").hide();
+		$("#boards").show();
+		
+		var onAuthorize = function() {
+
+
+			var boardsLoaded = Trello.get("members/me/boards/pinned", function(boards) {
+				$boards = $("#boards");
+				$boards.empty();
+				$.each(boards, function(i, board) {
+					$("<div id='"+board.id+"' class='board'>").html("<b>"+board.name+"</b>").appendTo($boards);
+				});
+			});
+
+			var $cards = $("<div>").text("Loading Cards...").appendTo("#output");
+
+			// prepare cards data
+			 $.when(boardsLoaded)
+			 	.then(function() {
+					 Trello.get("members/me/cards/open?actions=commentCard,createCard,updateCard,createList,updateList,addMemberToCard,removeMemberFromCard", function(cards) {
+						 var boards = {}, listIds = [];
+
+						 // group cards by tasks and sort by time
+						 _.each(cards, function(card) {
+							 if (!boards[card.idBoard]) {
+								 boards[card.idBoard] = [];
+							 }
+							 boards[card.idBoard].push(card);
+							 listIds.push(card.idList);
+						 });
+
+						 _.each(boards, function(tasks) {
+							 var sorted = _.sortBy(tasks, function(task) {
+								 return $.timeago.parse(task.actions[0].date);
+							 });
+
+							 _.chain(sorted)
+									 .reverse()
+									 .each(renderCard);
+
+						 });
+
+						 _.chain(listIds)
+								 .unique()
+								 .each(function(idList) {
+									 Trello.get("lists/" + idList, function(list) {
+										 updateListNames(list);
+									 });
+								 });
+
+					 });
+				 });
+
+			function renderCard(card) {
+				var authorAndTimestamp = (card.actions && card.actions[0]) ? 'Last action: ' + card.actions[0].memberCreator.fullName + '  ' + $.timeago(card.actions[0].date) + ' | ' : '';
+
+				$("<a></a>", {
+					'id': "card_" + card.idBoard,
+					'data-list-id': card.idList
+				}).attr({href: card.url, target: "trello"})
+					.html("<li id='"+card.idList+"' class='card'>" + card.name +
+						"<br /><div class='subscript'>"+ authorAndTimestamp + '<span class="list">loading</span></div></li>')
+					.appendTo("#"+card.idBoard);
+			}
+
+			function updateListNames(list) {
+				$("a[data-list-id=" + list.id + "] .list").text(list.name);
+			}
+				
+
+		};
+			  
+		Trello.authorize({
+			interactive:false,
+			success: onAuthorize
+		});
+	}
+	else
+	{
+		$("#auth").show();
+		$("#boards").hide();	
+		
+	}
+	
+
+</script>
+
+</html>

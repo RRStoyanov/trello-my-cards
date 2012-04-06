@@ -1,0 +1,83 @@
+<html>
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://api.trello.com/1/client.js?key=d7704cd36b82b0ec891e9196b95576f8"></script>
+
+<style type="text/css">
+
+	body {
+		background-color:#164b69;
+		text-align:center;
+	}
+	
+	.msg {
+		text-align:center;
+		width:700px;
+		border-radius:5px;
+		background-color:#e3e3e3;
+		padding:15px;
+		margin:0 auto;
+		border:1px solid #FFF;
+		list-style-type:none;
+	}
+	
+</style>
+
+<body>
+	<div class="msg">
+		<div id="loggedout" >
+			<a id="connectLink" href="#">Connect to Trello</a>
+		</div>
+	
+		<div id="loggedin">
+			<div id="header">
+			</div><div id="output"></div>
+			<a id="disconnect" href="#">Log Out</a>
+		</div>
+	</div>
+</body>
+
+<script type="text/javascript">
+	
+	var onAuthorize = function() {
+		updateLoggedIn();
+		$("#output").empty();
+		
+		Trello.members.get("me", function(member){
+			updateAuth();
+			$("#output").append("You're now authenticated.  Close me and start being productive.");
+		});
+	};
+	
+	var updateLoggedIn = function() {
+		var isLoggedIn = Trello.authorized();
+		$("#loggedout").toggle(!isLoggedIn);
+		$("#loggedin").toggle(isLoggedIn);        
+	};
+		
+	var logout = function() {
+		Trello.deauthorize();
+		updateLoggedIn();
+	};
+	
+	var updateAuth = function() {
+		localStorage['auth'] = '1';
+	};
+					  
+	Trello.authorize({
+		interactive:false,
+		success: onAuthorize
+	});
+	
+	$("#connectLink")
+	.click(function(){
+		Trello.authorize({
+			success: onAuthorize
+		})
+	});
+		
+	$("#disconnect").click(logout);
+
+</script>
+
+</html>
