@@ -91,25 +91,32 @@
 	{
 		$("#auth").hide();
 		$("#boards").show();
+
+		var currentUserData = null;
 		
 		var onAuthorize = function() {
 
+			var boardsLoaded = Trello.get("members/me?actions=commentCard&boards=open&notifications=mentionedOnCard", function(myData) {
+				currentUserData = myData;
 
-			var boardsLoaded = Trello.get("members/me/boards/pinned", function(boards) {
+				// boards
 				$boards = $("#boards");
 				$boards.empty();
-				$.each(boards, function(i, board) {
+				_.each(myData.boards, function(board) {
 					$("<div id='"+board.id+"' class='board'>").html("<b>"+board.name+"</b>").appendTo($boards);
 				});
+
 			});
 
 			var $cards = $("<div>").text("Loading Cards...").appendTo("#output");
 
-			// prepare cards data
+			// prepare my cards data
 			 $.when(boardsLoaded)
 			 	.then(function() {
 					 Trello.get("members/me/cards/open?actions=commentCard,createCard,updateCard,createList,updateList,addMemberToCard,removeMemberFromCard", function(cards) {
 						 var boards = {}, listIds = [];
+
+						 console.log(cards);
 
 						 // group cards by tasks and sort by time
 						 _.each(cards, function(card) {
@@ -143,11 +150,13 @@
 				 });
 
 			function renderCard(card) {
-				var authorAndTimestamp = (card.actions && card.actions[0]) ? 'Last action: ' + card.actions[0].memberCreator.fullName + '  ' + $.timeago(card.actions[0].date) + ' | ' : '';
+				var authorAndTimestamp = (card.actions && card.actions[0]) ? 'Last action: ' + card.actions[0].memberCreator.fullName + '  ' + $.timeago(card.actions[0].date) + ' | ' : '',
+					cardType = _.include(card.idMembers, currentUserData.id) ? 'mycard' : '';
 
 				$("<a></a>", {
 					'id': "card_" + card.idBoard,
-					'data-list-id': card.idList
+					'data-list-id': card.idList,
+					'class': 'type-' + cardType
 				}).attr({href: card.url, target: "trello"})
 					.html("<li id='"+card.idList+"' class='card'>" + card.name +
 						"<br /><div class='subscript'>"+ authorAndTimestamp + '<span class="list">loading</span></div></li>')
@@ -157,7 +166,6 @@
 			function updateListNames(list) {
 				$("a[data-list-id=" + list.id + "] .list").text(list.name);
 			}
-				
 
 		};
 			  
