@@ -2,87 +2,13 @@
 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script type="text/javascript" src="jquery.timeago.js"></script>
+<script type="text/javascript" src="jquery.pubsub.js"></script>
 <script type="text/javascript" src="underscore.js"></script>
 <script type="text/javascript" src="backbone.js"></script>
 <script type="text/javascript" src="app.js"></script>
 <script type="text/javascript" src="https://api.trello.com/1/client.js?key=d7704cd36b82b0ec891e9196b95576f8"></script>
 
-<style type="text/css">
-
-	body {
-		width:335px;
-		background-color:#164b69;
-		font-family:Helvetica, sans-serif;
-	}
-	
-	#output {
-		width:455px;
-		background:#FFF;
-		border:1px solid #FFF;
-		padding:10px;
-		border-radius:10px;
-	}
-
-	ul {
-		margin: 0;
-		padding: 0;
-	}
-	
-	ul li {
-		list-style-type:none;
-	}
-	
-	.card a {
-		width:285px;
-		border-radius:5px;
-		background-color:#FFF;
-		padding:5px;
-		padding-bottom: 15px;
-		margin-bottom:5px;
-		border:1px solid #BBB;
-		display:  block;
-	}
-	
-	a {
-		text-decoration:none;
-		color:#000;
-	}
-
-	.loading {
-		color: #fff;
-		text-align: center;
-	}
-	
-	.board {
-		width:300px;
-		background:#e3e3e3;
-		border-radius:5px;
-		padding:10px;
-		margin-bottom:5px;
-	}
-	
-	.subscript {
-		float:right;
-		font-size:10px;
-		color:#BBB;
-	}
-	
-	#auth {
-		text-align:center;
-		font-weight:bold;
-	}
-	
-	#auth a {
-		color:#EEE;
-		text-decoration:none;
-	}
-	
-	#auth a:hover {
-		border-bottom:1px solid #EEE;
-	}
-	
-		
-</style>
+<link rel="stylesheet" href="style.css" type="text/css" media="all">
 
 <body>
 	<div id="auth">
@@ -91,98 +17,40 @@
 		</script>
   	</div>
 
-	<div id="boards">
-		<div class="loading">Loading boards...</div>
+	<div id="app">
+		<div class="filter">
+			<input type="checkbox" checked="checked" name="assignedToUser" id="assignedToUser" /><label for="assignedToUser">Assigned to me</label>
+			<input type="checkbox" checked="checked" name="commentedByUser" id="commentedByUser" /><label for="commentedByUser">Commented by me</label>
+			<input type="checkbox" checked="checked" name="userMention" id="userMention" /><label for="userMention">Mention of me</label>
+		</div>
+		<div class="boards">
+			<div class="loading">Loading boards...</div>
+		</div>
 	</div>
 </body>
 
 <script type="text/javascript">
 	jQuery(function($) {
-	if(localStorage['auth'] == '1')
-	{
-		$("#auth").hide();
-		$("#boards").show();
+		if(localStorage['auth'] == '1')
+		{
+			$("#auth").hide();
+			$("#boards").show();
 
-		var currentUserData = null;
-		
-		var onAuthorize = function() {
-
-			new TrelloApp({
-				el: $("#boards")
+			Trello.authorize({
+				interactive:false,
+				success: function() {
+					new TrelloApp({
+						el: $("#app")
+					});
+				}
 			});
+		}
+		else
+		{
+			$("#auth").show();
+			$("#boards").hide();
 
 		}
-			/*
-			// prepare my cards data
-			 $.when(boardsLoaded)
-			 	.then(function() {
-					 Trello.get("members/me/cards/open?actions=commentCard,createCard,updateCard,createList,updateList,addMemberToCard,removeMemberFromCard", function(cards) {
-						 var boards = {}, listIds = [];
-
-						 console.log(cards);
-
-						 // group cards by tasks and sort by time
-						 _.each(cards, function(card) {
-							 if (!boards[card.idBoard]) {
-								 boards[card.idBoard] = [];
-							 }
-							 boards[card.idBoard].push(card);
-							 listIds.push(card.idList);
-						 });
-
-						 _.each(boards, function(tasks) {
-							 var sorted = _.sortBy(tasks, function(task) {
-								 return $.timeago.parse(task.actions[0].date);
-							 });
-
-							 _.chain(sorted)
-								 .reverse()
-								 .each(renderCard);
-
-						 });
-
-						 _.chain(listIds)
-							 .unique()
-							 .each(function(idList) {
-								 Trello.get("lists/" + idList, function(list) {
-									 updateListNames(list);
-								 });
-							 });
-
-					 });
-				 });
-
-			function renderCard(card) {
-				var authorAndTimestamp = (card.actions && card.actions[0]) ? 'Last action: ' + card.actions[0].memberCreator.fullName + '  ' + $.timeago(card.actions[0].date) + ' | ' : '',
-					cardType = _.include(card.idMembers, currentUserData.id) ? 'mycard' : '';
-
-				$("<a></a>", {
-					'id': "card_" + card.idBoard,
-					'data-list-id': card.idList,
-					'class': 'type-' + cardType
-				}).attr({href: card.url, target: "trello"})
-					.html("<li id='"+card.idList+"' class='card'>" + card.name +
-						"<br /><div class='subscript'>"+ authorAndTimestamp + '<span class="list">loading</span></div></li>')
-					.appendTo("#"+card.idBoard);
-			}
-
-			function updateListNames(list) {
-				$("a[data-list-id=" + list.id + "] .list").text(list.name);
-			}
-
-		};
-			  */
-		Trello.authorize({
-			interactive:false,
-			success: onAuthorize
-		});
-	}
-	else
-	{
-		$("#auth").show();
-		$("#boards").hide();	
-		
-	}
 	});
 	
 

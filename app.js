@@ -4,6 +4,10 @@
 	// Card
 	var Card = Backbone.Model.extend({
 
+		defaults: {
+			flags: []
+		},
+
 		toJSON: function() {
 			var modelAttrs = Backbone.Model.prototype.toJSON.call(this);
 
@@ -11,6 +15,16 @@
 			modelAttrs.lastActionDate = $.timeago(this.lastActionDate());
 
 			return modelAttrs;
+		},
+
+		addFlag: function(flag) {
+			var flags = this.get('flags');
+			flags.push(flag);
+			this.set('flags', _.unique(flags));
+		},
+
+		hasFlag: function(flag) {
+			return _.contains(this.get('flags'), flag);
 		},
 
 		lastAction: function() {
@@ -53,19 +67,42 @@
 		tagName: 'li',
 		className: 'card',
 
-		template: _.template('<a href="<%= url %>" target="_blank"><%= name %>' +
+		template: _.template('<a href="<%= url %>" target="_blank">' +
+				'<div class="flags clearfix"><% _.each(flags, function(flagName) { %> <span class="flag <%= flagName %>"></span> <% }); %></div>' +
+				'<%= name %>' +
 				'<br /><div class="subscript">Last action: <%= lastActionUser %> <%= lastActionDate %> | <span class="list">loading</span></div>' +
 				'</a>'),
 
 		initialize: function() {
 			this.model.bind('change', this.render, this);
+
+			$.subscribe('filterCards', _.bind(this.modifyDisplay, this));
 		},
 
 		render: function() {
 			this.$el.html(this.template(this.model.toJSON()));
 			this.$el.attr("data-list-id", this.model.get("idList"));
 			return this;
+		},
+
+		modifyDisplay: function(filter) {
+			this.$el.removeClass('filter-matched');
+			if (!this.isFiltered(filter)) {
+				this.$el.addClass('filter-matched');
+			}
+
+		},
+
+		isFiltered: function(filter) {
+			var cardView = this;
+			if (filter.flags) {
+				return !_.any(filter.flags, function(flag) {
+					return cardView.model.hasFlag(flag);
+				});
+			}
+			return true;
 		}
+
 	});
 
 
@@ -113,6 +150,14 @@
 	// App
 	var App = Backbone.View.extend({
 
+		options: {
+			cardActions: "commentCard,createCard,updateCard,createList,updateList,addMemberToCard,removeMemberFromCard"
+		},
+
+		events: {
+			"change .filter :checkbox": "filterCards"
+		},
+
 		initialize: function() {
 			this.boards = new BoardList();
 			this.boards.bind('add', this.render, this);
@@ -129,11 +174,11 @@
 
 		render: function() {
 			var appView = this;
-			appView.$el.empty();
+			appView.$('.boards').empty();
 
 			this.boards.each(function(board) {
 				var view = new BoardView({model: board});
-				appView.$el.append(view.render().el);
+				appView.$('.boards').append(view.render().el);
 			});
 		},
 
@@ -152,11 +197,11 @@
 			});
 
 			// users cards
-			var myCardsLoaded = $.when(boardsLoaded)
+			$.when(boardsLoaded)
 				.then(function() {
 
 				console.time("members load");
-				 Trello.get("members/me/cards/open?actions=commentCard,createCard,updateCard,createList,updateList,addMemberToCard,removeMemberFromCard", function(cards) {
+				 Trello.get("members/me/cards/open?actions=" + app.options.cardActions, function(cards) {
 					 console.time("cards");
 					 console.timeEnd("members load");
 
@@ -168,13 +213,13 @@
 							 console.log('board ' + card.idBoard + ' not found', card);
 							 return;
 						 }
+						 card.flags = ['assignedToUser'];
 						 board.cards.add(card, {silent: true});
 						 listIds.push(card.idList);
 					 });
 
 					 app.trigger('usersCardsLoaded');
 
-					 // lazy update of list names
 					  _.chain(listIds)
 						 .unique()
 						 .each(_.bind(app.loadList, app));
@@ -196,11 +241,14 @@
 
 				var card = board.cards.get(notification.data.card.id);
 				if (card) {
+					card.addFlag('userMention');
 					return;
 				}
 
-				Trello.get('cards/' + notification.data.card.id + '?actions=commentCard,createCard,updateCard,createList,updateList,addMemberToCard,removeMemberFromCard', function(card) {
+				Trello.get('cards/' + notification.data.card.id + '?actions=' + app.options.cardActions, function(card) {
+					card.flags = ['userMention'];
 					board.addCard(card);
+					app.loadList(card.idList);
 				});
 			});
 		},
@@ -217,12 +265,13 @@
 
 				var card = board.cards.get(action.data.card.id);
 				if (card) {
+					card.addFlag('commentedByUser');
 					return;
 				}
 
-				Trello.get('cards/' + action.data.card.id + '?actions=commentCard,createCard,updateCard,createList,updateList,addMemberToCard,removeMemberFromCard', function(card) {
+				Trello.get('cards/' + action.data.card.id + '?actions=' + app.options.cardActions, function(card) {
+					card.flags = ['commentedByUser'];
 					board.addCard(card);
-
 					app.loadList(card.idList);
 				});
 			});
@@ -246,6 +295,22 @@
 
 		updateListNames: function(list) {
 			this.$("li[data-list-id=" + list.id + "] .list").text(list.name);
+		},
+
+		filterCards: function(e) {
+
+			// prepare filter data
+			var displayFlags = [];
+			this.$('.filter input:checked').each(function() {
+				displayFlags.push($(this).attr('name'));
+			});
+
+			// filter
+			this.$('.boards').addClass('filtered');
+			$.publish('filterCards', {
+				flags: displayFlags
+			});
+
 		}
 
 	});
