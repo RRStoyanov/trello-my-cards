@@ -53,8 +53,8 @@
 		tagName: 'li',
 		className: 'card',
 
-		template: _.template('<a href="<%= url %>"><%= name %>' +
-				'<br /><div class="subscript"><%= lastActionUser %> <%= lastActionDate %></div>' +
+		template: _.template('<a href="<%= url %>" target="_blank"><%= name %>' +
+				'<br /><div class="subscript">Last action: <%= lastActionUser %> <%= lastActionDate %> | <span class="list">loading</span></div>' +
 				'</a>'),
 
 		initialize: function() {
@@ -63,6 +63,7 @@
 
 		render: function() {
 			this.$el.html(this.template(this.model.toJSON()));
+			this.$el.attr("data-list-id", this.model.get("idList"));
 			return this;
 		}
 	});
@@ -114,9 +115,14 @@
 
 		initialize: function() {
 			this.boards = new BoardList();
-
 			this.boards.bind('add', this.render, this);
-			this.bind('dataLoaded', this.render, this);
+
+			this.bind('usersCardsLoaded', this.render, this);
+			this.bind('usersCardsLoaded', this.loadMentions, this);
+			this.bind('usersCardsLoaded', this.loadCommentedCards, this);
+
+			this.userData = null;
+			this.lists = [];
 
 			this.loadData();
 		},
@@ -135,19 +141,26 @@
 			var app = this;
 
 			var boardsLoaded = Trello.get("members/me?actions=commentCard&boards=open&notifications=mentionedOnCard", function(myData) {
+
+				app.userData = myData;
+
 				// boards
 				_.each(myData.boards, function(board) {
 					app.boards.add(board);
 				});
+
 			});
 
 			// users cards
-			$.when(boardsLoaded)
+			var myCardsLoaded = $.when(boardsLoaded)
 				.then(function() {
+
 				console.time("members load");
 				 Trello.get("members/me/cards/open?actions=commentCard,createCard,updateCard,createList,updateList,addMemberToCard,removeMemberFromCard", function(cards) {
 					 console.time("cards");
 					 console.timeEnd("members load");
+
+					 var listIds = [];
 
 					 _.each(cards, function(card) {
 						 var board = app.boards.get(card.idBoard);
@@ -156,13 +169,85 @@
 							 return;
 						 }
 						 board.cards.add(card, {silent: true});
+						 listIds.push(card.idList);
 					 });
 
-					 app.trigger('dataLoaded');
-					console.timeEnd("cards");
+					 app.trigger('usersCardsLoaded');
+
+					 // lazy update of list names
+					  _.chain(listIds)
+						 .unique()
+						 .each(_.bind(app.loadList, app));
+
+					 console.timeEnd("cards");
 				 });
 			 });
+
+		},
+
+		loadMentions: function() {
+			var app = this;
+			_.each(this.userData.notifications, function(notification) {
+				var board = app.boards.get(notification.data.board.id);
+				if (!board) {
+					console.log('board ' + notification.data.board.id + ' not found');
+					return;
+				}
+
+				var card = board.cards.get(notification.data.card.id);
+				if (card) {
+					return;
+				}
+
+				Trello.get('cards/' + notification.data.card.id + '?actions=commentCard,createCard,updateCard,createList,updateList,addMemberToCard,removeMemberFromCard', function(card) {
+					board.addCard(card);
+				});
+			});
+		},
+
+		loadCommentedCards: function() {
+			var app = this;
+			console.log(this.userData);
+			_.each(this.userData.actions, function(action) {
+				var board = app.boards.get(action.data.board.id);
+				if (!board) {
+					console.log('board ' + action.data.board.id + ' not found');
+					return;
+				}
+
+				var card = board.cards.get(action.data.card.id);
+				if (card) {
+					return;
+				}
+
+				Trello.get('cards/' + action.data.card.id + '?actions=commentCard,createCard,updateCard,createList,updateList,addMemberToCard,removeMemberFromCard', function(card) {
+					board.addCard(card);
+
+					app.loadList(card.idList);
+				});
+			});
+		},
+
+		loadList: function(idList) {
+			var app = this, list = _.find(this.lists, function(list) {
+				return list.id == idList;
+			});
+
+			if (list) {
+				this.updateListNames(list);
+				return;
+			}
+
+			Trello.get('lists/' + idList, function(list) {
+				app.lists.push(list);
+				app.updateListNames(list);
+			});
+		},
+
+		updateListNames: function(list) {
+			this.$("li[data-list-id=" + list.id + "] .list").text(list.name);
 		}
+
 	});
 
 	window.TrelloApp = App;
