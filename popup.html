@@ -3,6 +3,8 @@
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script type="text/javascript" src="jquery.timeago.js"></script>
 <script type="text/javascript" src="underscore.js"></script>
+<script type="text/javascript" src="backbone.js"></script>
+<script type="text/javascript" src="app.js"></script>
 <script type="text/javascript" src="https://api.trello.com/1/client.js?key=d7704cd36b82b0ec891e9196b95576f8"></script>
 
 <style type="text/css">
@@ -19,6 +21,11 @@
 		border:1px solid #FFF;
 		padding:10px;
 		border-radius:10px;
+	}
+
+	ul {
+		margin: 0;
+		padding: 0;
 	}
 	
 	.card {
@@ -86,7 +93,7 @@
 </body>
 
 <script type="text/javascript">
-	
+	jQuery(function($) {
 	if(localStorage['auth'] == '1')
 	{
 		$("#auth").hide();
@@ -96,20 +103,12 @@
 		
 		var onAuthorize = function() {
 
-			var boardsLoaded = Trello.get("members/me?actions=commentCard&boards=open&notifications=mentionedOnCard", function(myData) {
-				currentUserData = myData;
-
-				// boards
-				$boards = $("#boards");
-				$boards.empty();
-				_.each(myData.boards, function(board) {
-					$("<div id='"+board.id+"' class='board'>").html("<b>"+board.name+"</b>").appendTo($boards);
-				});
-
+			new TrelloApp({
+				el: $("#boards")
 			});
 
-			var $cards = $("<div>").text("Loading Cards...").appendTo("#output");
-
+		}
+			/*
 			// prepare my cards data
 			 $.when(boardsLoaded)
 			 	.then(function() {
@@ -133,18 +132,18 @@
 							 });
 
 							 _.chain(sorted)
-									 .reverse()
-									 .each(renderCard);
+								 .reverse()
+								 .each(renderCard);
 
 						 });
 
 						 _.chain(listIds)
-								 .unique()
-								 .each(function(idList) {
-									 Trello.get("lists/" + idList, function(list) {
-										 updateListNames(list);
-									 });
+							 .unique()
+							 .each(function(idList) {
+								 Trello.get("lists/" + idList, function(list) {
+									 updateListNames(list);
 								 });
+							 });
 
 					 });
 				 });
@@ -168,7 +167,7 @@
 			}
 
 		};
-			  
+			  */
 		Trello.authorize({
 			interactive:false,
 			success: onAuthorize
@@ -180,6 +179,7 @@
 		$("#boards").hide();	
 		
 	}
+	});
 	
 
 </script>
