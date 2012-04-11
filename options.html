@@ -58,6 +58,7 @@
 	var logout = function() {
 		Trello.deauthorize();
 		updateLoggedIn();
+		localStorage['auth'] = '0';
 	};
 	
 	var updateAuth = function() {
@@ -72,6 +73,7 @@
 	$("#connectLink")
 	.click(function(){
 		Trello.authorize({
+			expiration: "never",
 			success: onAuthorize
 		})
 	});

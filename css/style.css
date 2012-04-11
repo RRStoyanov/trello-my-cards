@@ -8,12 +8,8 @@ body {
 .clearfix{zoom:1;}
 .clearfix:after{clear:both;content:".";display:block;height:0;overflow:hidden;visibility:hidden;}
 
-#output {
-	width:455px;
-	background:#FFF;
-	border:1px solid #FFF;
-	padding:10px;
-	border-radius:10px;
+#auth, #app {
+	display: none;
 }
 
 ul {
