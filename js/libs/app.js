@@ -98,7 +98,6 @@
 			if (!this.isFiltered(filter)) {
 				this.$el.addClass('filter-matched');
 			}
-
 		},
 
 		isFiltered: function(filter) {
@@ -175,12 +174,14 @@
 			this.userData = null;
 			this.lists = [];
 
+			this.$('.checkboxes').buttonset();
+
 			this.loadData();
 		},
 
 		render: function() {
 			var appView = this;
-			appView.$('.boards').empty();
+			this.$('.boards').empty();
 
 			this.boards.each(function(board) {
 				var view = new BoardView({model: board});

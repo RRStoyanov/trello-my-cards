@@ -1,14 +1,16 @@
 <html>
 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-<script type="text/javascript" src="jquery.timeago.js"></script>
-<script type="text/javascript" src="jquery.pubsub.js"></script>
-<script type="text/javascript" src="underscore.js"></script>
-<script type="text/javascript" src="backbone.js"></script>
-<script type="text/javascript" src="app.js"></script>
+<script type="text/javascript" src="js/libs/jquery-ui-1.8.18.custom.min.js"></script>
+<script type="text/javascript" src="js/libs/jquery.timeago.js"></script>
+<script type="text/javascript" src="js/libs/jquery.pubsub.js"></script>
+<script type="text/javascript" src="js/libs/underscore.js"></script>
+<script type="text/javascript" src="js/libs/backbone.js"></script>
+<script type="text/javascript" src="js/libs/app.js"></script>
 <script type="text/javascript" src="https://api.trello.com/1/client.js?key=d7704cd36b82b0ec891e9196b95576f8"></script>
 
-<link rel="stylesheet" href="style.css" type="text/css" media="all">
+<link rel="stylesheet" href="css/style.css" type="text/css" media="all">
+<link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.8.18.custom.css" type="text/css" media="all">
 
 <body>
 	<div id="auth">
@@ -19,9 +21,11 @@
 
 	<div id="app">
 		<div class="filter">
-			<input type="checkbox" checked="checked" name="assignedToUser" id="assignedToUser" /><label for="assignedToUser">Assigned to me</label>
-			<input type="checkbox" checked="checked" name="commentedByUser" id="commentedByUser" /><label for="commentedByUser">Commented by me</label>
-			<input type="checkbox" checked="checked" name="userMention" id="userMention" /><label for="userMention">Mention of me</label>
+			<div class="checkboxes">
+				<input type="checkbox" checked="checked" name="assignedToUser" id="assignedToUser" /><label for="assignedToUser"><span class="square assignedToUser"></span><span class="label">Assigned to me</span></label>
+				<input type="checkbox" checked="checked" name="commentedByUser" id="commentedByUser" /><label for="commentedByUser"><span class="square commentedByUser"></span><span class="label">My comments</span></label>
+				<input type="checkbox" checked="checked" name="userMention" id="userMention" /><label for="userMention"><span class="square userMention"></span><span class="label">Mentions</span></label>
+			</div>
 		</div>
 		<div class="boards">
 			<div class="loading">Loading boards...</div>
