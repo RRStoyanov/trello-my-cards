@@ -133,7 +133,11 @@
 		tagName: 'div',
 		className: 'board',
 
-		template: _.template('<strong><%= name %></strong><ul class="cards"></ul>'),
+		template: _.template('<strong><%= name %></strong><ul class="cards"></ul><div class="loading_dots">' +
+				'<span></span>' +
+				'<span></span>' +
+				'<span></span>' +
+				'</div>'),
 
 		initialize: function() {
 			this.model.cards.bind('add', this.render, this);
@@ -166,17 +170,26 @@
 		},
 
 		initialize: function() {
+			var app = this;
+
 			this.boards = new BoardList();
 			this.boards.bind('add', this.render, this);
 
 			this.bind('usersCardsLoaded', this.render, this);
+			this.bind('usersCardsLoaded', function() {
+				app.$el.addClass("loaded");
+			});
 
 			this.userData = null;
 			this.lists = [];
 
-			this.$('.checkboxes').buttonset();
-
+			this.initFilter();
 			this.loadData();
+		},
+
+
+		initFilter: function() {
+			this.$('.checkboxes').buttonset();
 		},
 
 		render: function() {

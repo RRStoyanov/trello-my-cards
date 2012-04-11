@@ -1,0 +1,1 @@
+document.write('<script src="https://api.trello.com/1/client.js?key=INSERT_YOUR_APP_KEY_HERE"></script>');
