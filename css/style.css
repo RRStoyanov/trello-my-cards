@@ -3,6 +3,7 @@ body {
 	background-color:#164b69;
 	font-family:Helvetica, sans-serif;
 	font-size: 14px;
+	overflow-x: hidden;
 }
 
 .clearfix{zoom:1;}
