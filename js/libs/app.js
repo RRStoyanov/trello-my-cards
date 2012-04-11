@@ -133,7 +133,7 @@
 		tagName: 'div',
 		className: 'board',
 
-		template: _.template('<strong><%= name %></strong><ul class="cards"></ul><div class="loading_dots">' +
+		template: _.template('<a href="<%= url %>" class="header"><%= name %></a><ul class="cards"></ul><div class="loading_dots">' +
 				'<span></span>' +
 				'<span></span>' +
 				'<span></span>' +
@@ -205,7 +205,7 @@
 		loadData: function() {
 			var app = this;
 
-			Trello.get("members/me?actions=commentCard&boards=open&notifications=mentionedOnCard", function(myData) {
+			Trello.get("members/me?actions=commentCard&boards=open&notifications=mentionedOnCard&board_fields=name,closed,url", function(myData) {
 
 				app.userData = myData;
 

@@ -89,6 +89,10 @@ a {
 	margin-bottom:5px;
 }
 
+.board a.header {
+	font-weight: bold;
+}
+
 .filter .ui-buttonset {
 	margin: 0;
 }
