@@ -5,7 +5,8 @@
 	var Card = Backbone.Model.extend({
 
 		defaults: {
-			flags: []
+			flags: [],
+			listName: 'loading'
 		},
 
 		toJSON: function() {
@@ -70,13 +71,20 @@
 		template: _.template('<a href="<%= url %>" target="_blank">' +
 				'<div class="flags clearfix"><% _.each(flags, function(flagName) { %> <span class="flag <%= flagName %>"></span> <% }); %></div>' +
 				'<%= name %>' +
-				'<br /><div class="subscript">Last action: <%= lastActionUser %> <%= lastActionDate %> | <span class="list">loading</span></div>' +
+				'<br /><div class="subscript">Last action: <%= lastActionUser %> <%= lastActionDate %> | <span class="list"><%= listName %></span></div>' +
 				'</a>'),
 
 		initialize: function() {
+			var cardView = this;
 			this.model.bind('change', this.render, this);
 
 			$.subscribe('filterCards', _.bind(this.modifyDisplay, this));
+			$.subscribe('listLoaded', function(list) {
+				if (list.id != cardView.model.get('idList')) {
+					return;
+				}
+				cardView.model.set('listName', list.name);
+			});
 		},
 
 		render: function() {
@@ -163,8 +171,6 @@
 			this.boards.bind('add', this.render, this);
 
 			this.bind('usersCardsLoaded', this.render, this);
-			this.bind('usersCardsLoaded', this.loadMentions, this);
-			this.bind('usersCardsLoaded', this.loadCommentedCards, this);
 
 			this.userData = null;
 			this.lists = [];
@@ -185,7 +191,7 @@
 		loadData: function() {
 			var app = this;
 
-			var boardsLoaded = Trello.get("members/me?actions=commentCard&boards=open&notifications=mentionedOnCard", function(myData) {
+			Trello.get("members/me?actions=commentCard&boards=open&notifications=mentionedOnCard", function(myData) {
 
 				app.userData = myData;
 
@@ -194,38 +200,41 @@
 					app.boards.add(board);
 				});
 
+				app.loadUsersCards();
 			});
+		},
 
-			// users cards
-			$.when(boardsLoaded)
-				.then(function() {
+		loadUsersCards: function() {
+			var app = this
 
-				console.time("members load");
-				 Trello.get("members/me/cards/open?actions=" + app.options.cardActions, function(cards) {
-					 console.time("cards");
-					 console.timeEnd("members load");
+			console.time("members load");
+			Trello.get("members/me/cards/open?actions=" + app.options.cardActions, function(cards) {
+				 console.time("cards");
+				 console.timeEnd("members load");
 
-					 var listIds = [];
+				 var listIds = [];
 
-					 _.each(cards, function(card) {
-						 var board = app.boards.get(card.idBoard);
-						 if (!board) {
-							 console.log('board ' + card.idBoard + ' not found', card);
-							 return;
-						 }
-						 card.flags = ['assignedToUser'];
-						 board.cards.add(card, {silent: true});
-						 listIds.push(card.idList);
-					 });
-
-					 app.trigger('usersCardsLoaded');
-
-					  _.chain(listIds)
-						 .unique()
-						 .each(_.bind(app.loadList, app));
-
-					 console.timeEnd("cards");
+				 _.each(cards, function(card) {
+					 var board = app.boards.get(card.idBoard);
+					 if (!board) {
+						 console.log('board ' + card.idBoard + ' not found', card);
+						 return;
+					 }
+					 card.flags = ['assignedToUser'];
+					 board.cards.add(card, {silent: true});
+					 listIds.push(card.idList);
 				 });
+
+				 app.loadMentions();
+				 app.loadCommentedCards();
+
+				app.trigger('usersCardsLoaded');
+
+				  _.chain(listIds)
+					 .unique()
+					 .each(_.bind(app.loadList, app));
+
+				 console.timeEnd("cards");
 			 });
 
 		},
@@ -283,19 +292,16 @@
 			});
 
 			if (list) {
-				this.updateListNames(list);
+				$.publish("listLoaded", list);
 				return;
 			}
 
 			Trello.get('lists/' + idList, function(list) {
 				app.lists.push(list);
-				app.updateListNames(list);
+				$.publish("listLoaded", list);
 			});
 		},
 
-		updateListNames: function(list) {
-			this.$("li[data-list-id=" + list.id + "] .list").text(list.name);
-		},
 
 		filterCards: function(e) {
 
