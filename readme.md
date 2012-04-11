@@ -17,7 +17,9 @@ The extension is on a very early stage of development, so expect some hiccups.
 
 # Installation
 
-Installation instructions:
+[Install packed version](https://s3.amazonaws.com/keboola-chrome-extensions/trello.crx)
+
+Installation from source files:
 
   * Download and unpack this repository to local file system
   * Copy file key.template.js to key.js
