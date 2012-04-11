@@ -2,6 +2,7 @@ body {
 	width:335px;
 	background-color:#164b69;
 	font-family:Helvetica, sans-serif;
+	font-size: 14px;
 }
 
 .clearfix{zoom:1;}
@@ -28,8 +29,7 @@ ul li {
 	width:285px;
 	border-radius:5px;
 	background-color:#FFF;
-	padding:5px;
-	padding-bottom: 15px;
+	padding: 5px 10px 15px 10px;
 	margin-bottom:5px;
 	border:1px solid #BBB;
 	display:  block;
@@ -91,6 +91,8 @@ a {
 
 .board a.header {
 	font-weight: bold;
+	display: block;
+	margin-bottom: 5px
 }
 
 .filter .ui-buttonset {
