@@ -1,7 +1,7 @@
-# Trello My Cards - Chrome Extenison
+# Trello My Cards - Chrome Extension
 
 This extension provides you quick access to all your cards in [Trello collaboration tool](https://trello.com/).
-Cards are grouped by boards and sorted by last activity date in card.
+Cards are grouped by boards and sorted by last activity in card.
 
 Several types of cards are displayed:
 
