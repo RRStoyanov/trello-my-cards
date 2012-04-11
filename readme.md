@@ -1,6 +1,6 @@
 # Trello My Cards - Chrome Extenison
 
-This extension provides you quick access to all your cards in Trello collaboration tool.
+This extension provides you quick access to all your cards in [Trello collaboration tool](https://trello.com/).
 Cards are grouped by boards and sorted by last activity date in card.
 
 Several types of cards are displayed:
@@ -13,7 +13,7 @@ This extension was inspired by: https://chrome.google.com/webstore/detail/ofhppp
 
 # Warning
 
-The Extension is on a very early stage of development, so expect some hiccups.
+The extension is on a very early stage of development, so expect some hiccups.
 
 # Installation
 
