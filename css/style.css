@@ -57,6 +57,10 @@ ul li {
 	margin-bottom: 5px
 }
 
+.filter {
+	text-align: center;
+}
+
 .filter .ui-buttonset {
 	margin: 0;
 }
