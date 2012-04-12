@@ -6,7 +6,7 @@
 <script type="text/javascript" src="js/libs/jquery.pubsub.js"></script>
 <script type="text/javascript" src="js/libs/underscore.js"></script>
 <script type="text/javascript" src="js/libs/backbone.js"></script>
-<script type="text/javascript" src="js/libs/app.js"></script>
+<script type="text/javascript" src="js/app.js"></script>
 <script type="text/javascript" src="key.js"></script>
 
 <link rel="stylesheet" href="css/style.css" type="text/css" media="all">
@@ -35,6 +35,11 @@
 
 <script type="text/javascript">
 	jQuery(function($) {
+
+		if (window.navigator.userAgent.indexOf('Macintosh') == -1) {
+			$('body').addClass("custom-scroll");
+		}
+
 		if(localStorage['auth'] == '1')
 		{
 			$("#auth").hide();
@@ -56,7 +61,7 @@
 
 		}
 	});
-	
+
 
 </script>
 
