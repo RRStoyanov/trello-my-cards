@@ -93,6 +93,14 @@ ul li {
 	margin-left: 15px;
 }
 
+.filter .showDone {
+	font-size: 12px;
+	text-align: left;
+	margin-top: 5px;
+	margin-left: 20px;
+	color: gray;
+}
+
 .card a {
 	border-radius:5px;
 	background-color:#FFF;

@@ -1286,7 +1286,7 @@
   // Set up inheritance for the model, collection, and view.
   Model.extend = Collection.extend = Router.extend = View.extend = extend;
 
-  // Backbone.sync
+  //  
   // -------------
 
   // Map from CRUD to HTTP for our default `Backbone.sync` implementation.
