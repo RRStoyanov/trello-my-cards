@@ -12,7 +12,6 @@
 
 	var FilterView = Backbone.View.extend({
 
-
 		template: _.template('<div class="checkboxes">' +
 				'<input type="checkbox" name="assignedToUser" id="assignedToUser" /><label for="assignedToUser"><span class="square assignedToUser"></span><span class="label">Assigned to me</span></label>' +
 				'<input type="checkbox" name="commentedByUser" id="commentedByUser" /><label for="commentedByUser"><span class="square commentedByUser"></span><span class="label">My comments</span></label>' +
@@ -25,10 +24,6 @@
 			"change :checkbox": "filterChanged"
 		},
 
-		initialize: function() {
-
-		},
-
 		render: function() {
 			var filterView = this;
 			this.$el.html(this.template());
@@ -36,7 +31,6 @@
 				filterView.$('[name=' + flag + ']').prop('checked', _.contains(filterView.model.get('flags'), flag));
 			});	
 			this.$('.checkboxes').buttonset();
-
 
 			this.$showDoneCheckbox = this.$('[name=showDone]');
 
@@ -58,7 +52,6 @@
 		}
 	});
 
-	// Card
 	var Card = Backbone.Model.extend({
 
 		defaults: {
@@ -82,6 +75,7 @@
 
 			modelAttrs.lastActionUser = this.lastActionUser();
 			modelAttrs.lastActionDate = $.timeago(this.lastActionDate());
+			modelAttrs.dueDate = this.dueDate();
 
 			return modelAttrs;
 		},
@@ -120,6 +114,14 @@
 			return $.timeago.parse(lastAction.date);
 		},
 
+		dueDate: function() {
+			if (!this.get('badges').due) {
+				return;
+			}
+
+			return $.timeago.parse(this.get('badges').due);
+		},
+
 		matchesFilter: function(filter) {
 			var card = this, result = true;
 			result &= _.any(filter.get('flags'), function(flag) {
@@ -138,9 +140,22 @@
 	var CardList = Backbone.Collection.extend({
 		model: Card,
 
-		// sort by last activity date
-		comparator: function(card) {
-			return -card.lastActionDate();
+		comparator: function(firstCard, secondCard) {
+			// primary sort by due date asc
+			if (firstCard.dueDate() == secondCard.dueDate()) {
+				// secondary sort by last action desc
+				return -1 * (firstCard.lastActionDate() - secondCard.lastActionDate());
+			}
+
+			if (firstCard.dueDate() == undefined) {
+				return 1;
+			}
+
+			if (secondCard.dueDate() == undefined) {
+				return -1;
+			}
+
+			return firstCard.dueDate() - secondCard.dueDate();
 		},
 
 		filtered: function(filter) {
@@ -155,10 +170,13 @@
 		tagName: 'li',
 		className: 'card',
 
-		template: _.template('<a href="<%= url %>" target="_blank">' +
+		template: _.template('<a href="<%= url %>" class="clearfix" target="_blank">' +
 				'<div class="flags clearfix"><% _.each(flags, function(flagName) { %> <span class="flag <%= flagName %>"></span> <% }); %></div>' +
-				'<%= name %>' +
-				'<br /><div class="subscript">Last action: <%= lastActionUser %> <%= lastActionDate %> | <span class="list"><%= listName %></span></div>' +
+				'<div class="name"><%= name %></div>' +
+				'<div class="badges">' +
+				'<% if(dueDate) { %><div class="badge due"><span class="app-icon small-icon date-icon"></span><%= dateFormat(dueDate,"mmm d") %></div><% } %>' +
+				'</div><div class="subscript">' +
+				'Last action: <%= lastActionUser %> <%= lastActionDate %> | <span class="list"><%= listName %></span></div>' +
 				'</a>'),
 
 		render: function() {
@@ -166,11 +184,8 @@
 			return this;
 		}
 
-
 	});
 
-
-	// Board
 	var Board = Backbone.Model.extend({
 
 		initialize: function() {
@@ -227,8 +242,6 @@
 		}
 	});
 
-
-	// App
 	var App = Backbone.View.extend({
 
 		options: {
