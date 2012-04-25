@@ -122,6 +122,35 @@
 			return $.timeago.parse(this.get('badges').due);
 		},
 
+		/**
+		 * Possible flags:
+		 * due
+		 * due-past
+		 * due-now
+		 * due-soon
+		 * due-future
+		 */
+		dueDateFlag: function() {
+			var dueDate = this.dueDate(), now = new Date();
+			if (!dueDate) {
+				return '';
+			}
+
+			if (dueDate < now) {
+				return 'due-past';
+			}
+
+			if (dueDate < now.getTime() + 4 * 1000 * 60 *60) {
+				return 'due-now';
+			}
+
+			if (dueDate < now.getTime() + 24 * 1000 * 60 *60) {
+				return 'due-soon';
+			}
+
+			return 'due-future';
+		},
+
 		matchesFilter: function(filter) {
 			var card = this, result = true;
 			result &= _.any(filter.get('flags'), function(flag) {
@@ -179,8 +208,19 @@
 				'Last action: <%= lastActionUser %> <%= lastActionDate %> | <span class="list"><%= listName %></span></div>' +
 				'</a>'),
 
+		dueDateFlagsShades: {
+			'due-past': 'light',
+			'due-now': 'light',
+			'due-soon': 'light',
+			'due-future': ''
+		},
+
 		render: function() {
 			this.$el.html(this.template(this.model.toJSON()));
+
+			this.$('.badge.due').addClass(this.model.dueDateFlag());
+			this.$('.badge.due .app-icon').addClass(this.dueDateFlagsShades[this.model.dueDateFlag()] ? this.dueDateFlagsShades[this.model.dueDateFlag()] : '');
+
 			return this;
 		}
 
@@ -306,7 +346,7 @@
 		},
 
 		loadUsersCards: function() {
-			var app = this
+			var app = this;
 
 			console.time("members load");
 			Trello.get("members/me/cards/open?actions=" + app.options.cardActions, function(cards) {

@@ -1,9 +1,16 @@
 body {
 	min-width: 335px;
 	background-color:#164b69;
-	font-family:Helvetica, sans-serif;
-	font-size: 14px;
 	overflow-x: hidden;
+}
+
+body,
+input,
+select,
+textarea {
+	line-height:1;
+	font:14px/18px "Helvetica Neue",Arial,Helvetica,sans-serif;
+	color:#393939;
 }
 
 /**
