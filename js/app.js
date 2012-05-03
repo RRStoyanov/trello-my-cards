@@ -285,7 +285,7 @@
 	var App = Backbone.View.extend({
 
 		options: {
-			cardActions: 'commentCard,createCard,updateCard,createList,updateList,addMemberToCard,removeMemberFromCard'
+			cardActions: 'commentCard,createCard,updateCard,createList,addMemberToCard,removeMemberFromCard'
 		},
 
 		initialize: function() {
