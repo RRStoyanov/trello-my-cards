@@ -2,11 +2,21 @@
 
 
 	var Filter = Backbone.Model.extend({
-		localStorage: new Backbone.LocalStorage("filters"),
+		localStorage: new Backbone.LocalStorage('filters'),
 
 		defaults: {
-			flags: ["assignedToUser"],
+			flags: ['assignedToUser'],
 			showDone: true
+		},
+
+		toString: function() {
+			var params = this.get('flags').slice().sort();
+
+			if (this.get('showDone')) {
+				params.push('showDone');
+			}
+
+			return params.join('|');
 		}
 	});
 
@@ -38,6 +48,8 @@
 				this.$showDoneCheckbox.prop('checked', true);
 			}
 
+			this.model.bind('change', this.gaTrackChangeEvent, this);
+
 		},
 
 		filterChanged: function() {
@@ -49,6 +61,10 @@
 			this.model.set("flags", displayFlags);
 			this.model.set("showDone", this.$showDoneCheckbox.is(':checked'));
 			this.model.save();
+		},
+
+		gaTrackChangeEvent: function() {
+			_gaq.push(['_trackEvent', 'Filters', 'Change', this.model.toString()]);
 		}
 	});
 
