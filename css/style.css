@@ -44,7 +44,16 @@ h1 {
 .clearfix{zoom:1;}
 .clearfix:after{clear:both;content:".";display:block;height:0;overflow:hidden;visibility:hidden;}
 
-#app {
+.popup #app {
+	display: none;
+}
+.popup #auth {
+	display: block;
+}
+.popup.authorized #app {
+	display: block;
+}
+.popup.authorized #auth {
 	display: none;
 }
 

@@ -10,8 +10,7 @@ jQuery(function($) {
 		interactive: false,
 		success: function() {
 			
-			$("#auth").hide();
-			$("#app").show();
+			$("body").addClass("authorized");
 
 			new TrelloApp({
 				el: $("#app")
