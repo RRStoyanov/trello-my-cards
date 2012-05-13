@@ -11,7 +11,7 @@ jQuery(function($) {
 			$("#output").append("Thank you, you're now authenticated you can start using Trello My Cards extension immediately. <br/>This page will be automatically closed in few seconds.");
 		});
 
-		setTimeout(closeCurrentTab, 1O * 1000);
+		setTimeout(closeCurrentTab, 10000);
 	};
 						  
 	Trello.authorize({
