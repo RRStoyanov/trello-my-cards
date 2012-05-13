@@ -13,6 +13,13 @@ textarea {
 	color:#393939;
 }
 
+h1 {
+	font-size: 22px;
+	line-height: 26px;
+	margin-bottom: 10px;
+	margin-top: 0;
+}
+
 /**
 * Scrollbars
 */
@@ -261,7 +268,7 @@ a {
 	max-width: 540px;
 	margin: 0 auto;
 	position: relative;
-	padding: 15px 10px 50px;
+	padding: 92px 10px 50px;
 }
 
 .account-page .account-content {
@@ -276,6 +283,28 @@ a {
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	padding: 20px;
+}
+
+.connect #success {
+	display: none;
+}
+
+.connect.authorized #success {
+	display: block;
+}
+
+.connect.authorized #redirect {
+	display: none;
+}
+
+.connect .tick {
+	display: block;
+	width: 48px;
+	height: 48px;
+	background: transparent url(../icons/tick-48.png) top left no-repeat;
+	float: left;
+	margin-right: 15px;
+	margin-bottom: 10px;
 }
 
 	
