@@ -37,7 +37,7 @@ textarea {
 .clearfix{zoom:1;}
 .clearfix:after{clear:both;content:".";display:block;height:0;overflow:hidden;visibility:hidden;}
 
-#auth, #app {
+#app {
 	display: none;
 }
 
@@ -251,7 +251,36 @@ a {
 }
 
 /**
-* Loading dots
+* Account page 
+*/
+.account-page {
+	background-color: #E6E6E6;
+}
+
+.account-page #surface {
+	max-width: 540px;
+	margin: 0 auto;
+	position: relative;
+	padding: 15px 10px 50px;
+}
+
+.account-page .account-content {
+	background-color: #F0F0F0;
+	border: 1px solid #BFBFBF;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	-moz-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	-ms-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	-o-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	-webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	padding: 20px;
+}
+
+	
+/**
+* Loading dots - http://dabblet.com/gist/2336513
 */
 .loaded .loading_dots {
 	display: none;
