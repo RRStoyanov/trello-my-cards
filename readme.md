@@ -9,7 +9,8 @@ Several types of cards are displayed:
   * cards commented by me
   * cards where I am mentioned
 
-This extension was inspired by: https://chrome.google.com/webstore/detail/ofhppploglffgmbgmidejclkaipbjpac?hl=cs
+This extension was inspired by [Trello Cards extension](https://chrome.google.com/webstore/detail/ofhppploglffgmbgmidejclkaipbjpac?hl=cs),
+extended by card types, filtering, sorting, due dates.
 
 # Warning
 
@@ -17,7 +18,7 @@ The extension is on a very early stage of development, so expect some hiccups.
 
 # Installation
 
-[Install packed version](https://s3.amazonaws.com/keboola-chrome-extensions/trello.crx)
+[Install from Chrome Web Store](https://chrome.google.com/webstore/detail/gfibakafolondafoldolofciodfnbado)
 
 Installation from source files:
 
