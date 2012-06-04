@@ -17,7 +17,7 @@ jQuery(function($) {
 	if (!Trello.authorized()) {
 		Trello.authorize({
 			expiration: "never",
-			name: "Trello My Cards",
+			name: "My Cards For Trello",
 			success: onAuthorize
 		});
 	}
