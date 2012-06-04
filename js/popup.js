@@ -6,8 +6,7 @@ jQuery(function($) {
 
 	$("#connectLink").attr("href", chrome.extension.getURL('connect.html'));
 
-	Trello.authorize({
-		interactive: false,
+	Trello.authorize({		interactive: false,
 		success: function() {
 			
 			$("body").addClass("authorized");

@@ -1,4 +1,4 @@
-body {
+BODY {
 	min-width: 335px;
 	background-color:#164b69;
 	overflow-x: hidden;
@@ -20,7 +20,7 @@ h1 {
 	margin-top: 0;
 }
 
-/**
+/** 
 * Scrollbars
 */
 .custom-scroll::-webkit-scrollbar {
