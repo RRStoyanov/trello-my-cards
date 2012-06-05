@@ -20,7 +20,8 @@
 
       Filter.prototype.defaults = {
         flags: ['assignedToUser'],
-        showDone: true
+        showDone: true,
+        search: ''
       };
 
       Filter.prototype.toString = function() {
@@ -42,28 +43,34 @@
       FilterView.name = 'FilterView';
 
       function FilterView() {
+        this.gaTrackChangeEvent = __bind(this.gaTrackChangeEvent, this);
         return FilterView.__super__.constructor.apply(this, arguments);
       }
 
-      FilterView.prototype.template = _.template('<div class="checkboxes">' + '<input type="checkbox" name="assignedToUser" id="assignedToUser" /><label for="assignedToUser"><span class="square assignedToUser"></span><span class="label">Assigned to me</span></label>' + '<input type="checkbox" name="commentedByUser" id="commentedByUser" /><label for="commentedByUser"><span class="square commentedByUser"></span><span class="label">My comments</span></label>' + '<input type="checkbox" name="userMention" id="userMention" /><label for="userMention"><span class="square userMention"></span><span class="label">Mentions</span></label>' + '</div>' + '<div class="showDone"><input type="checkbox" id="showDone" name="showDone"/><label for="showDone">Show cards in done lists</label></div>');
+      FilterView.prototype.template = _.template('<div class="checkboxes">' + '<input type="checkbox" name="assignedToUser" id="assignedToUser" /><label for="assignedToUser"><span class="square assignedToUser"></span><span class="label">Assigned to me</span></label>' + '<input type="checkbox" name="commentedByUser" id="commentedByUser" /><label for="commentedByUser"><span class="square commentedByUser"></span><span class="label">My comments</span></label>' + '<input type="checkbox" name="userMention" id="userMention" /><label for="userMention"><span class="square userMention"></span><span class="label">Mentions</span></label>' + '</div>' + '<div class="showDone"><input type="checkbox" id="showDone" name="showDone"/><label for="showDone">Show cards in done lists</label></div>' + '<input class="search" name="search" placeholder="Search..."/>');
 
       FilterView.prototype.events = {
-        "change :checkbox": "filterChanged"
+        "change :checkbox": "filterChanged",
+        "keyup input[name=search]": "filterChanged"
+      };
+
+      FilterView.prototype.initialize = function() {
+        return this.model.bind('change', this.gaTrackChangeEvent);
       };
 
       FilterView.prototype.render = function() {
         var filterView;
         filterView = this;
         this.$el.html(this.template());
-        return _.each(['assignedToUser', 'commentedByUser', 'userMention'], function(flag) {
-          filterView.$('[name=' + flag + ']').prop('checked', _.contains(filterView.model.get('flags'), flag));
-          filterView.$('.checkboxes').buttonset();
-          filterView.$showDoneCheckbox = this.$('[name=showDone]');
-          if (filterView.model.get('showDone')) {
-            filterView.$showDoneCheckbox.prop('checked', true);
-          }
-          return filterView.model.bind('change', this.gaTrackChangeEvent);
+        _.each(['assignedToUser', 'commentedByUser', 'userMention'], function(flag) {
+          return filterView.$('[name=' + flag + ']').prop('checked', _.contains(filterView.model.get('flags'), flag));
         });
+        this.$('.checkboxes').buttonset();
+        this.$showDoneCheckbox = this.$('[name=showDone]');
+        if (this.model.get('showDone')) {
+          this.$showDoneCheckbox.prop('checked', true);
+        }
+        return this.$('[name=search]').val(this.model.get('search'));
       };
 
       FilterView.prototype.filterChanged = function() {
@@ -73,6 +80,7 @@
           return displayFlags.push($(this).attr('name'));
         });
         this.model.set("flags", displayFlags);
+        this.model.set("search", this.$('[name=search]').val());
         this.model.set("showDone", this.$showDoneCheckbox.is(':checked'));
         return this.model.save();
       };
@@ -193,7 +201,7 @@
       };
 
       Card.prototype.matchesFilter = function(filter) {
-        var card, result;
+        var card, regexp, result;
         card = this;
         result = true;
         result &= _.any(filter.get('flags'), function(flag) {
@@ -201,6 +209,10 @@
         });
         if (!filter.get('showDone')) {
           result &= card.get('listName') !== 'Done';
+        }
+        if (filter.get('search')) {
+          regexp = new RegExp(filter.get('search'), 'i');
+          result &= card.get('name').search(regexp) >= 0;
         }
         return result;
       };
@@ -344,13 +356,19 @@
       };
 
       BoardView.prototype.render = function() {
-        var boardView;
+        var boardView, cards;
         boardView = this;
         this.$el.html(this.template(this.model.toJSON()));
         this.$('.cards').empty();
-        this.model.cards.filtered(this.options.filter).each(function(card) {
+        cards = this.model.cards.filtered(this.options.filter);
+        cards.each(function(card) {
           return boardView.$('.cards').append(boardView.getCardView(card).render().el);
         });
+        if (cards.size() === 0) {
+          this.$el.addClass('noCards');
+        } else {
+          this.$el.removeClass('noCards');
+        }
         return this;
       };
 
