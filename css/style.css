@@ -85,12 +85,32 @@ ul li {
 .filter {
 	text-align: center;
 }
+.filter .search input:focus {
+	outline: none;
+}
+.filter .search input::-webkit-input-placeholder  {
+	color:#fff;
+}
+
 .filter .search {
+	margin-bottom: 10px;
+	position: relative;
+}
+
+.filter .search input{
 	padding: 5px 10px;
 	border-radius: 5px;
 	background-color: #B8B8B8;
 	width: 90%;
 	border: 0px solid;
+}
+.filter .icon.delete {
+	position: absolute;
+	top: 7px;
+	right: 23px;
+}
+.filter .search.empty .icon.delete {
+	display: none;
 }
 
 .filter .ui-buttonset {
@@ -260,6 +280,19 @@ a {
 .small-icon.date-icon.light, .small-icon.date-icon.light-hover:hover {
 	background-position: -198px -126px;
 }
+
+.icon.delete {
+	opacity: 0.5;
+	cursor: pointer;
+    width: 18px;
+    height: 18px;
+  	display: inline-block;
+  	background: transparent url(images/icon-delete.png) top left no-repeat;
+
+}
+
+
+
 
 #auth {
 	text-align:center;

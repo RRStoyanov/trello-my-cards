@@ -10,7 +10,7 @@ jQuery ($) ->
 			showDone: true
 			search: ''
 
-		toString: ->
+		toStringForGaEvent: ->
 			params = this.get('flags').slice().sort()
 
 			if (@get 'showDone')
@@ -21,22 +21,27 @@ jQuery ($) ->
 
 	class FilterView extends Backbone.View
 
-		template: _.template '<div class="checkboxes">' +
+		template: _.template '<div class="search"><input name="search" placeholder="Search..."/>' +
+					'<span class="icon delete"></span>' +
+					'</div>' +
+					'<div class="checkboxes">' +
 					'<input type="checkbox" name="assignedToUser" id="assignedToUser" /><label for="assignedToUser"><span class="square assignedToUser"></span><span class="label">Assigned to me</span></label>' +
 					'<input type="checkbox" name="commentedByUser" id="commentedByUser" /><label for="commentedByUser"><span class="square commentedByUser"></span><span class="label">My comments</span></label>' +
 					'<input type="checkbox" name="userMention" id="userMention" /><label for="userMention"><span class="square userMention"></span><span class="label">Mentions</span></label>' +
 				'</div>' +
-	            '<div class="showDone"><input type="checkbox" id="showDone" name="showDone"/><label for="showDone">Show cards in done lists</label></div>' +
-	            '<input class="search" name="search" placeholder="Search..."/>'
+	            '<div class="showDone"><input type="checkbox" id="showDone" name="showDone"/><label for="showDone">Show cards in done lists</label></div>'
 
 		events:
 			"change :checkbox": "filterChanged",
 			"keyup input[name=search]": "filterChanged"
+			"click .search .delete": "resetSearch"
 
 		initialize: ->
-			@model.bind 'change', @gaTrackChangeEvent
+			@model.bind 'change:flags', @gaTrackChangeEvent
+			@model.bind 'change:showDone', @gaTrackChangeEvent
+			@model.bind 'change:search', @updateSearchStatus
 
-		render: ->
+		render: =>
 			filterView = @
 			@$el.html @template();
 
@@ -49,10 +54,10 @@ jQuery ($) ->
 			if @model.get 'showDone'
 				@$showDoneCheckbox.prop 'checked', true
 
-			@$('[name=search]').val(@model.get 'search')
+			@updateSearchStatus()
 
 			
-		filterChanged: ->
+		filterChanged: (e) ->
 			displayFlags = []
 			@$('.checkboxes input:checked').each ->
 				displayFlags.push $(this).attr('name')
@@ -62,8 +67,15 @@ jQuery ($) ->
 			@model.set "showDone", this.$showDoneCheckbox.is(':checked')
 			@model.save()
 
+		resetSearch: ->
+			@model.set "search", ""
+
+		updateSearchStatus: =>
+			@$el.find('.search').toggleClass('empty', !@model.get 'search')
+			@$('[name=search]').val(@model.get 'search')
+
 		gaTrackChangeEvent: =>
-			_gaq.push ['_trackEvent', 'Filters', 'Change', @model.toString()];
+			_gaq.push ['_trackEvent', 'Filters', 'Change', @model.toStringForGaEvent()];
 
 	class Card extends Backbone.Model
 
@@ -156,8 +168,7 @@ jQuery ($) ->
 				result &= card.get('listName') != 'Done'
 
 			if filter.get 'search'
-				regexp = new RegExp filter.get('search'), 'i'
-				result &= (card.get('name').search(regexp) >= 0)
+				result &= (card.get('name').toLowerCase().indexOf(filter.get('search')) != -1)
 
 			result
 
