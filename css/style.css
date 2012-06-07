@@ -106,8 +106,8 @@ ul li {
 }
 .filter .icon.delete {
 	position: absolute;
-	top: 7px;
-	right: 23px;
+	top: 8px;
+	right: 22px;
 }
 .filter .search.empty .icon.delete {
 	display: none;
@@ -284,8 +284,8 @@ a {
 .icon.delete {
 	opacity: 0.5;
 	cursor: pointer;
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   	display: inline-block;
   	background: transparent url(images/icon-delete.png) top left no-repeat;
 

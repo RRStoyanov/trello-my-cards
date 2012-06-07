@@ -55,6 +55,7 @@ jQuery ($) ->
 				@$showDoneCheckbox.prop 'checked', true
 
 			@updateSearchStatus()
+			@
 
 			
 		filterChanged: (e) ->
@@ -218,7 +219,7 @@ jQuery ($) ->
 			@$('.badge.due .app-icon')
 				.addClass( if @dueDateFlagsShades[@model.dueDateFlag()] then  @dueDateFlagsShades[@model.dueDateFlag()] else '')
 
-			return this
+			@
 
 	class Board extends Backbone.Model
 		initialize: ->
@@ -262,7 +263,7 @@ jQuery ($) ->
 				boardView.$('.cards').append(boardView.getCardView(card).render().el)
 
 			if cards.size() is 0 then @$el.addClass 'noCards' else @$el.removeClass 'noCards'
-			return @
+			@
 
 	class App extends Backbone.View
 		options:
@@ -287,6 +288,9 @@ jQuery ($) ->
 			@filter = new Filter
 				id: 'main'
 			@filter.fetch()
+
+			# dont remeber search
+			@filter.set 'search', ''
 
 		render: ->
 			filterView = new FilterView
